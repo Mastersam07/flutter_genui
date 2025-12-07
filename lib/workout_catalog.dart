@@ -2,49 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
-/// Advanced catalog with navigation and interactive widgets
 class WorkoutCatalog {
   static Catalog getCatalog() => CoreCatalogItems.asCatalog().copyWith([
-        workoutPlanCard,
-        workoutSessionCard,
-        exerciseStepCard,
-        progressDashboard,
-        navigationMenu,
-        statCard,
-        achievementBadge,
-        workoutSchedule,
-      ]);
+    workoutPlanCard,
+    workoutSessionCard,
+    progressDashboard,
+    navigationMenu,
+  ]);
 
-  // ========== WORKOUT PLAN CARD ==========
   static final workoutPlanCard = CatalogItem(
     name: 'WorkoutPlanCard',
     dataSchema: S.object(
       properties: {
-        'title': S.string(description: 'The title of the workout plan'),
+        'title': S.string(description: 'Workout title'),
         'description': S.string(description: 'Brief description'),
-        'difficulty': S.string(
-          description: 'Difficulty level',
-          enumValues: ['beginner', 'intermediate', 'advanced'],
-        ),
-        'duration': S.string(description: 'Estimated duration'),
+        'difficulty': S.string(description: 'Difficulty level'),
+        'duration': S.string(description: 'Duration'),
         'exercises': S.list(
-          description: 'List of exercises',
+          description: 'Exercise list',
           items: S.object(
             properties: {
               'name': S.string(description: 'Exercise name'),
-              'sets': S.integer(description: 'Number of sets'),
-              'reps': S.string(description: 'Number of repetitions'),
-              'description': S.string(description: 'Form tips'),
-              'restTime': S.string(description: 'Rest time between sets'),
+              'sets': S.integer(description: 'Sets count'),
+              'reps': S.string(description: 'Reps'),
             },
-            required: ['name', 'sets', 'reps'],
+            required: ['name'],
           ),
         ),
-        'startButtonText': S.string(
-          description: 'Text for start button (e.g., "Start Workout")',
-        ),
+        'startButtonText': S.string(description: 'Button text'),
       },
-      required: ['title', 'exercises'],
+      required: ['title'],
     ),
     widgetBuilder: (itemContext) => _buildWorkoutPlan(
       buildChild: itemContext.buildChild,
@@ -83,17 +70,18 @@ class WorkoutCatalog {
             Text(
               title,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             if (description != null) ...[
               const SizedBox(height: 8),
-              Text(description,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: Colors.grey[700])),
+              Text(
+                description,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+              ),
             ],
             if (duration != null || difficulty != null) ...[
               const SizedBox(height: 12),
@@ -102,17 +90,20 @@ class WorkoutCatalog {
                   if (duration != null) ...[
                     const Icon(Icons.access_time, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(duration,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.grey[600])),
+                    Text(
+                      duration,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    ),
                     const SizedBox(width: 16),
                   ],
                   if (difficulty != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: _getDifficultyColor(difficulty),
                         borderRadius: BorderRadius.circular(12),
@@ -177,9 +168,7 @@ class WorkoutCatalog {
                             Expanded(
                               child: Text(
                                 name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -190,7 +179,10 @@ class WorkoutCatalog {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _buildInfoChip(
-                                context, Icons.fitness_center, '$sets sets'),
+                              context,
+                              Icons.fitness_center,
+                              '$sets sets',
+                            ),
                             _buildInfoChip(context, Icons.repeat, '$reps reps'),
                             if (restTime != null)
                               _buildInfoChip(context, Icons.timer, restTime),
@@ -200,9 +192,7 @@ class WorkoutCatalog {
                           const SizedBox(height: 12),
                           Text(
                             desc,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Colors.grey[700],
                                   fontStyle: FontStyle.italic,
@@ -244,7 +234,6 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== WORKOUT SESSION CARD ==========
   static final workoutSessionCard = CatalogItem(
     name: 'WorkoutSessionCard',
     dataSchema: S.object(
@@ -257,7 +246,9 @@ class WorkoutCatalog {
         'restTime': S.string(description: 'Rest time'),
         'description': S.string(description: 'Exercise description'),
         'isResting': S.boolean(description: 'Whether currently resting'),
-        'timeRemaining': S.string(description: 'Time remaining in current phase'),
+        'timeRemaining': S.string(
+          description: 'Time remaining in current phase',
+        ),
       },
       required: ['currentExercise', 'exerciseNumber', 'totalExercises'],
     ),
@@ -303,7 +294,7 @@ class WorkoutCatalog {
                 ? [Colors.blue[400]!, Colors.blue[600]!]
                 : [
                     Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primaryContainer
+                    Theme.of(context).colorScheme.primaryContainer,
                   ],
           ),
         ),
@@ -324,8 +315,10 @@ class WorkoutCatalog {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -354,10 +347,7 @@ class WorkoutCatalog {
                 const SizedBox(height: 12),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
               const SizedBox(height: 24),
@@ -442,7 +432,6 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== EXERCISE STEP CARD ==========
   static final exerciseStepCard = CatalogItem(
     name: 'ExerciseStepCard',
     dataSchema: S.object(
@@ -513,20 +502,20 @@ class WorkoutCatalog {
                   Text(
                     instruction,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          decoration: isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
+                      fontWeight: FontWeight.w600,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
+                    ),
                   ),
                   if (tip != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       tip,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
-                          ),
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 ],
@@ -538,27 +527,15 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== PROGRESS DASHBOARD ==========
   static final progressDashboard = CatalogItem(
     name: 'ProgressDashboard',
     dataSchema: S.object(
       properties: {
-        'title': S.string(description: 'Dashboard title'),
-        'totalWorkouts': S.integer(description: 'Total workouts completed'),
-        'currentStreak': S.integer(description: 'Current workout streak'),
-        'weeklyGoal': S.integer(description: 'Weekly workout goal'),
-        'weeklyProgress': S.integer(description: 'Workouts completed this week'),
-        'achievements': S.list(
-          description: 'List of achievements',
-          items: S.object(
-            properties: {
-              'title': S.string(description: 'Achievement title'),
-              'icon': S.string(description: 'Icon name'),
-              'unlocked': S.boolean(description: 'Whether unlocked'),
-            },
-            required: ['title', 'unlocked'],
-          ),
-        ),
+        'title': S.string(description: 'Title'),
+        'totalWorkouts': S.integer(description: 'Total workouts'),
+        'currentStreak': S.integer(description: 'Streak days'),
+        'weeklyGoal': S.integer(description: 'Weekly goal'),
+        'weeklyProgress': S.integer(description: 'Weekly progress'),
       },
       required: ['totalWorkouts', 'currentStreak'],
     ),
@@ -586,7 +563,6 @@ class WorkoutCatalog {
     final currentStreak = json['currentStreak'] as int;
     final weeklyGoal = json['weeklyGoal'] as int?;
     final weeklyProgress = json['weeklyProgress'] as int?;
-    final achievements = json['achievements'] as List<dynamic>?;
 
     return Card(
       margin: const EdgeInsets.all(16.0),
@@ -599,9 +575,9 @@ class WorkoutCatalog {
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -631,9 +607,9 @@ class WorkoutCatalog {
               const SizedBox(height: 20),
               Text(
                 'Weekly Progress',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
               ClipRRect(
@@ -650,35 +626,9 @@ class WorkoutCatalog {
               const SizedBox(height: 8),
               Text(
                 '$weeklyProgress / $weeklyGoal workouts this week',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-            ],
-            if (achievements != null && achievements.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Achievements',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: achievements.map((achievement) {
-                  final achMap = achievement as Map<String, Object?>;
-                  final achTitle = achMap['title'] as String;
-                  final iconName = achMap['icon'] as String?;
-                  final unlocked = achMap['unlocked'] as bool;
-                  return _buildAchievementBadge(
-                    context,
-                    achTitle,
-                    iconName,
-                    unlocked,
-                  );
-                }).toList(),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ],
@@ -687,7 +637,6 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== NAVIGATION MENU ==========
   static final navigationMenu = CatalogItem(
     name: 'NavigationMenu',
     dataSchema: S.object(
@@ -697,9 +646,8 @@ class WorkoutCatalog {
           description: 'Menu options',
           items: S.object(
             properties: {
-              'label': S.string(description: 'Option label'),
-              'icon': S.string(description: 'Icon name'),
-              'action': S.string(description: 'Action identifier'),
+              'label': S.string(description: 'Label'),
+              'action': S.string(description: 'Action'),
             },
             required: ['label', 'action'],
           ),
@@ -740,9 +688,9 @@ class WorkoutCatalog {
             if (title != null) ...[
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
             ],
@@ -782,7 +730,6 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== STAT CARD ==========
   static final statCard = CatalogItem(
     name: 'StatCard',
     dataSchema: S.object(
@@ -832,7 +779,6 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== ACHIEVEMENT BADGE ==========
   static final achievementBadge = CatalogItem(
     name: 'AchievementBadge',
     dataSchema: S.object(
@@ -869,18 +815,16 @@ class WorkoutCatalog {
     return _buildAchievementBadge(context, title, iconName, unlocked);
   }
 
-  // ========== WORKOUT SCHEDULE ==========
   static final workoutSchedule = CatalogItem(
     name: 'WorkoutSchedule',
     dataSchema: S.object(
       properties: {
         'weekDays': S.list(
-          description: 'Schedule for each day of the week',
+          description: 'Week schedule',
           items: S.object(
             properties: {
-              'day': S.string(description: 'Day name'),
-              'workout': S.string(description: 'Workout name or "Rest"'),
-              'completed': S.boolean(description: 'Whether completed'),
+              'day': S.string(description: 'Day'),
+              'workout': S.string(description: 'Workout or Rest'),
             },
             required: ['day', 'workout'],
           ),
@@ -920,9 +864,9 @@ class WorkoutCatalog {
             Text(
               'This Week\'s Schedule',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 16),
             ...weekDays.map((dayData) {
@@ -940,15 +884,15 @@ class WorkoutCatalog {
                     color: completed
                         ? Colors.green[50]
                         : isRest
-                            ? Colors.grey[100]
-                            : Colors.blue[50],
+                        ? Colors.grey[100]
+                        : Colors.blue[50],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: completed
                           ? Colors.green
                           : isRest
-                              ? Colors.grey[300]!
-                              : Colors.blue[200]!,
+                          ? Colors.grey[300]!
+                          : Colors.blue[200]!,
                     ),
                   ),
                   child: Row(
@@ -957,13 +901,13 @@ class WorkoutCatalog {
                         completed
                             ? Icons.check_circle
                             : isRest
-                                ? Icons.beach_access
-                                : Icons.fitness_center,
+                            ? Icons.beach_access
+                            : Icons.fitness_center,
                         color: completed
                             ? Colors.green
                             : isRest
-                                ? Colors.grey[600]
-                                : Colors.blue[700],
+                            ? Colors.grey[600]
+                            : Colors.blue[700],
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -972,9 +916,7 @@ class WorkoutCatalog {
                           children: [
                             Text(
                               day,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
+                              style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     color: Colors.grey[600],
                                     fontWeight: FontWeight.w600,
@@ -982,9 +924,7 @@ class WorkoutCatalog {
                             ),
                             Text(
                               workout,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
+                              style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     decoration: completed
@@ -1006,10 +946,11 @@ class WorkoutCatalog {
     );
   }
 
-  // ========== HELPER METHODS ==========
-
   static Widget _buildInfoChip(
-      BuildContext context, IconData icon, String label) {
+    BuildContext context,
+    IconData icon,
+    String label,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -1053,8 +994,13 @@ class WorkoutCatalog {
     );
   }
 
-  static Widget _buildStatContainer(BuildContext context, IconData icon,
-      String value, String label, Color color) {
+  static Widget _buildStatContainer(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1077,9 +1023,9 @@ class WorkoutCatalog {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
-                ),
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1088,7 +1034,11 @@ class WorkoutCatalog {
   }
 
   static Widget _buildAchievementBadge(
-      BuildContext context, String title, String? iconName, bool unlocked) {
+    BuildContext context,
+    String title,
+    String? iconName,
+    bool unlocked,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

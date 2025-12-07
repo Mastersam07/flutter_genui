@@ -16,7 +16,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,7 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onEvent(UserActionEvent event) {
-    // Map events to natural language prompts for the AI
     final eventName = event.name;
     final context = event.context;
 
@@ -94,11 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
 
       default:
-        // For any other action, treat it as a navigation request
         prompt = 'User selected: ${context['label'] ?? eventName}. Generate the appropriate screen for this action.';
     }
 
-    // Send the prompt to the AI
     conversation.sendRequest(UserMessage.text(prompt));
   }
 
@@ -116,9 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final genUiManager = GenUiManager(catalog: catalog);
 
-    // Listen to events from the UI
     genUiManager.onSubmit.listen((message) {
-      // The event is JSON-encoded in the text
       try {
         final jsonData = jsonDecode(message.text) as Map<String, dynamic>;
         if (jsonData.containsKey('userAction')) {
@@ -127,7 +121,6 @@ class _MyHomePageState extends State<MyHomePage> {
           _onEvent(event);
         }
       } catch (e) {
-        // If parsing fails, just send the message text to the AI
         conversation.sendRequest(message);
       }
     });
@@ -135,80 +128,33 @@ class _MyHomePageState extends State<MyHomePage> {
     final generator = FirebaseAiContentGenerator(
       catalog: catalog,
       systemInstruction: '''
-You are an AI-powered fitness coach assistant with advanced UI generation capabilities. You can create multiple types of interactive screens and experiences.
+You are a fitness coach AI. You have 4 custom widgets:
 
-## Available Widgets:
+1. **WorkoutPlanCard** - Complete workout plan
+   - title, description, difficulty, duration
+   - exercises: list with name, sets, reps
+   - startButtonText
 
-1. **WorkoutPlanCard** - Display complete workout plans
-   - Required: title, exercises (list with name, sets, reps)
-   - Optional: description, difficulty (beginner/intermediate/advanced), duration, startButtonText
+2. **WorkoutSessionCard** - Active workout screen
+   - currentExercise, exerciseNumber, totalExercises
+   - sets, reps, restTime, description
 
-2. **WorkoutSessionCard** - Active workout session with timer-like display
-   - Required: currentExercise, exerciseNumber, totalExercises
-   - Optional: sets, reps, restTime, description, isResting, timeRemaining
-   - Great for guided workout experiences
+3. **ProgressDashboard** - Stats dashboard
+   - totalWorkouts, currentStreak
+   - weeklyGoal, weeklyProgress
 
-3. **ProgressDashboard** - Show user statistics and progress
-   - Required: totalWorkouts, currentStreak
-   - Optional: title, weeklyGoal, weeklyProgress, achievements (list with title, icon, unlocked)
+4. **NavigationMenu** - Navigation menu
+   - title
+   - options: list with label and action
 
-4. **WorkoutSchedule** - Weekly workout calendar
-   - Required: weekDays (list with day, workout, completed)
-   - Shows what workout is planned each day
+## Usage:
 
-5. **NavigationMenu** - Menu with action buttons
-   - Required: options (list with label, action)
-   - Optional: title, icon for each option
-   - Use actions like: "show_progress", "show_schedule", "create_workout", "show_home"
+Workout request → WorkoutPlanCard with 3-5 bodyweight exercises
+Progress request → ProgressDashboard with stats
+Menu request → NavigationMenu with options (actions: show_progress, show_schedule, create_workout, show_home)
+Session request → WorkoutSessionCard showing current exercise
 
-6. **StatCard** - Individual stat display
-   - Required: value, label
-   - Optional: icon, color (blue/green/orange/red/purple)
-
-7. **AchievementBadge** - Achievement display
-   - Required: title, unlocked (boolean)
-   - Optional: icon
-
-8. **ExerciseStepCard** - Step-by-step exercise instructions
-   - Required: stepNumber, instruction
-   - Optional: tip, isCompleted
-
-## How to Use:
-
-**For workout requests**: Generate a WorkoutPlanCard with 3-5 bodyweight exercises, include difficulty, duration, and add startButtonText: "Start Workout"
-
-**For navigation/menus**: When user says "show menu" or "what can I do", create a NavigationMenu with options like:
-- "View Progress" (action: show_progress)
-- "See Schedule" (action: show_schedule)
-- "New Workout" (action: create_workout)
-- "Home" (action: show_home)
-
-**For progress requests**: Generate a ProgressDashboard showing stats like totalWorkouts: 15, currentStreak: 7, weeklyGoal: 5, weeklyProgress: 3, and achievements
-
-**For schedule requests**: Generate a WorkoutSchedule with 7 days showing planned workouts
-
-**For active sessions**: Use WorkoutSessionCard to simulate an ongoing workout with exerciseNumber/totalExercises and optional timeRemaining
-
-**For exercise tutorials**: Generate multiple ExerciseStepCard widgets with step-by-step instructions
-
-## Examples:
-
-User: "Give me an upper body workout"
-→ Generate ONE WorkoutPlanCard with title "Upper Body Blast", difficulty: "intermediate", exercises list, startButtonText
-
-User: "Show my progress"
-→ Generate ONE ProgressDashboard with realistic stats and achievements
-
-User: "What can I do?"
-→ Generate ONE NavigationMenu with 4-5 options
-
-User: "Show this week's plan"
-→ Generate ONE WorkoutSchedule with 7 days
-
-User: "Start workout session"
-→ Generate ONE WorkoutSessionCard showing first exercise with timer
-
-You can generate MULTIPLE widgets in sequence to create rich experiences. Be creative and use the right widget for each request!
+Keep it simple!
 ''',
     );
     conversation = GenUiConversation(
