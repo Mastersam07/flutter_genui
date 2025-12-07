@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_firebase_ai/genui_firebase_ai.dart';
 import 'firebase_options.dart';
+import 'workout_catalog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +18,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'AI Workout Planner',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'AI Workout Planner'),
     );
   }
 }
@@ -58,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    final catalog = CoreCatalogItems.asCatalog();
+    final catalog = WorkoutCatalog.getCatalog();
     final generator = FirebaseAiContentGenerator(
       catalog: catalog,
       systemInstruction: '''
@@ -66,7 +70,15 @@ You are an expert in creating workout plans using only body weight exercises.
 No cardio, free weight or other sports. Each workout plan should be 3 to 5 different exercises,
 each with a number of sets and repetitions.
 
-When i send you a message, generate new UI that displays the workout plan you created in response
+When I send you a message, generate a new WorkoutPlanCard UI that displays the workout plan you created.
+The WorkoutPlanCard should include:
+- A title for the workout
+- A brief description
+- Difficulty level (beginner, intermediate, or advanced)
+- Estimated duration
+- A list of exercises with their name, sets, reps, optional description, and optional rest time
+
+Always use the WorkoutPlanCard widget to display workout plans.
 ''',
     );
     conversation = GenUiConversation(
@@ -96,20 +108,42 @@ When i send you a message, generate new UI that displays the workout plan you cr
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _textEditingController,
                       decoration: InputDecoration(
-                        hintText: 'Enter your message',
+                        hintText: 'Ask for a workout plan...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
+                      onSubmitted: (text) {
+                        _sendMessage(text);
+                        _textEditingController.clear();
+                      },
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.send),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    icon: const Icon(Icons.send),
                     onPressed: () {
                       _sendMessage(_textEditingController.text);
                       _textEditingController.clear();
